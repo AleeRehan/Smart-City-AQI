@@ -14,20 +14,21 @@ For the system design and diagram, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ```
 smart-city-aqi/
-├── sql/
-│   ├── 01_schema.sql          # create DB, schemas, all tables (run first)
-│   └── 02_gold_aggregate.sql  # Silver → Gold aggregation
-├── src/
-│   ├── aqi_utils.py           # EPA AQI formula + category + risk (shared)
-│   ├── db.py                  # Snowflake connection from .env
-│   ├── iot_simulator.py       # Stage 1A — sensor simulator
-│   ├── openaq_fetcher.py      # Stage 1B — OpenAQ V3 fetcher
-│   └── etl_pipeline.py        # Stage 2 — Bronze → Silver ETL
-├── dashboard/
-│   └── streamlit_app.py       # Stage 4 — live dashboard
-├── data/                      # CSV output from the simulator
+├── aqi_utils.py            # EPA AQI formula + category + risk (shared)
+├── db.py                   # Snowflake connection from .env
+├── iot_simulator.py        # Stage 1A — sensor simulator
+├── openaq_fetcher.py       # Stage 1B — OpenAQ V3 fetcher
+├── etl_pipeline.py         # Stage 2 — Bronze → Silver ETL
+├── build_gold.py           # Stage 3 — Silver → Gold (run after ETL)
+├── streamlit_app.py        # Stage 4 — live dashboard
+├── 01_schema.sql           # create DB, schemas, all tables (run first)
+├── 02_gold_aggregate.sql   # Silver → Gold aggregation (SQL alternative)
+├── make_diagram.py         # regenerates docs/architecture.png
+├── data/                   # iot_readings.csv (simulator output)
+├── docs/                   # architecture.png + diagram code
 ├── requirements.txt
 ├── .env.example
+├── ARCHITECTURE.md
 └── README.md
 ```
 
@@ -51,14 +52,15 @@ smart-city-aqi/
 
 | Step | Command | What it does |
 |------|---------|--------------|
-| 1 | Run `sql/01_schema.sql` in a Snowflake worksheet | Creates DB, schemas, tables |
-| 2 | `python src/openaq_fetcher.py` | Loads OpenAQ data → Bronze |
-| 3 | `python src/iot_simulator.py --minutes 30` | Streams sensor data → CSV + Bronze |
-| 4 | `python src/etl_pipeline.py` | Bronze → Silver (clean + enrich) |
-| 5 | Run `sql/02_gold_aggregate.sql` in Snowflake | Silver → Gold daily KPIs |
-| 6 | `streamlit run dashboard/streamlit_app.py` | Opens the live dashboard |
+| 1 | Run `01_schema.sql` in a Snowflake worksheet | Creates DB, schemas, tables |
+| 2 | `python openaq_fetcher.py` | Loads OpenAQ data → Bronze |
+| 3 | `python iot_simulator.py --minutes 30` | Streams sensor data → CSV + Bronze |
+| 4 | `python etl_pipeline.py` | Bronze → Silver (clean + enrich) |
+| 5 | `python build_gold.py` | Silver → Gold daily KPIs |
+| 6 | `streamlit run streamlit_app.py` | Opens the live dashboard |
 
 Run the simulator (step 3) in its own terminal so it keeps streaming while you work.
+Step 5 can also be done by running `02_gold_aggregate.sql` in a Snowflake worksheet.
 
 ## Deliverables checklist
 
