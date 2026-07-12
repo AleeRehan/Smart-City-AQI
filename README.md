@@ -8,19 +8,7 @@ Streamlit dashboard.
 
 ## Architecture
 
-```
-IoT simulator (Python) ─┐
-                        ├─► Bronze (RAW.IOT_READINGS, RAW.OPENAQ_RAW)
-OpenAQ V3 API ──────────┘        │
-                                 ▼  Python ETL (Pandas)
-                          Silver (CLEAN.AQI_CLEAN)   ← validated + enriched, both sources
-                                 │
-                                 ▼  Snowflake SQL (INSERT ... SELECT)
-                          Gold (ANALYTICS.CITY_DAILY) ← daily KPIs per city
-                                 │
-                                 ▼
-                          Streamlit dashboard
-```
+For the system design and diagram, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Project layout
 
@@ -89,4 +77,3 @@ Run the simulator (step 3) in its own terminal so it keeps streaming while you w
 - The OpenAQ V3 locations filter uses `iso=PK`. Pakistan stations are mostly in
   Karachi and Lahore; that is expected — the OpenAQ data is for comparison, not an
   exact per-city match.
-```
